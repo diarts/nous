@@ -1,0 +1,25 @@
+databases:
+  auth-db:
+    host: nous-auth-db
+    port: 5432
+    login: nous
+    password: nous123
+    database: nous_auth
+
+logging:
+  version: 1
+  disable_existing_loggers: False
+  # форматтеры
+  formatters:
+    default:
+      format: "%(pathname)s -[%(asctime)s] - %(levelname)s: %(message)s"
+
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: default
+      level: DEBUG
+      stream: ext://sys.stdout
+
+
+
