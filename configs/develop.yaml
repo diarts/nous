@@ -2,7 +2,7 @@ databases:
   auth-db:
     host: nous-auth-db
     port: 5432
-    login: nous
+    user: nous
     password: nous123
     database: nous_auth
 
