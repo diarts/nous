@@ -6,7 +6,7 @@ databases:
     password: nous123
     database: nous_auth
 
-logging:
+loggers:
   version: 1
   disable_existing_loggers: False
   # форматтеры

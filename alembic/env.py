@@ -10,7 +10,7 @@ from alembic import context
 sys.path.insert(
     0, os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 )
-from nous_auth.settings import get_settings
+from nous_auth.settings import get_config
 from nous_auth.db.models import meta
 
 # this is the Alembic Config object, which provides
@@ -35,7 +35,7 @@ target_metadata = meta
 try:
     url = os.environ['ALEMBIC_URL']
 except KeyError:
-    db_conf = get_settings()['databases']['auth-db']
+    db_conf = get_config()['databases']['auth-db']
     url = 'postgresql://{user}:{password}@{host}:{port}/{database}'.format(
         user=db_conf['user'],
         password=db_conf['password'],

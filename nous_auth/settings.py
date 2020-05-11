@@ -3,10 +3,10 @@ import pathlib
 import os
 
 BASE_DIR = pathlib.Path(__file__).parent.parent
-DEFAULT_CONFIG = pathlib.Path(BASE_DIR) / 'configs' / 'develop.yaml'
+DEFAULT_CONFIG = pathlib.Path(BASE_DIR) / 'config' / 'develop.yaml'
 
 
-def get_settings(path=None):
+def get_config(path: str = None):
     path = path or DEFAULT_CONFIG
     with open(path) as file:
         config = yaml.safe_load(file)
