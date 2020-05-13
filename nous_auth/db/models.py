@@ -25,15 +25,17 @@ user = Table(
     'user',
     meta,
     Column('id', Integer, primary_key=True),
-    Column('login', String(length=32), nullable=False, index=True),
-    Column('password', Text, nullable=False, index=True),
-    Column('username', String(length=128), nullable=False),
+    Column('email', String(length=128), nullable=True, index=True),
+    Column('password', Text, nullable=False),
+    Column('username', String(length=128), nullable=True, index=True),
     Column('phone', Integer, nullable=True, index=True),
     Column('create_date', Integer, nullable=False),
     Column('vip', Integer, nullable=True),
     Column('blocked', Integer, nullable=False, default=0),
     Column('role', SmallInteger, nullable=False, default=UserTypes.USER),
+    Column('country', SmallInteger, nullable=False),
 )
+
 token = Table(
     'token',
     meta,
@@ -42,6 +44,7 @@ token = Table(
     Column('token', Text, nullable=False, index=True),
     Column('create_date', Integer, nullable=False),
 )
+
 history = Table(
     'history',
     meta,
