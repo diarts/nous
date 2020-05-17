@@ -6,6 +6,8 @@ databases:
     password: nous123
     database: nous_auth
 
+services:
+
 loggers:
   version: 1
   disable_existing_loggers: False

@@ -14,11 +14,13 @@ logger = logging.getLogger(__name__)
 def get_app(config):
     """Configure aiohttp web application."""
     db_configs = config.pop('databases')
+    services = config.pop('services')
     auth_db = db_configs['auth-db']
 
     app = web.Application()
     app['config'] = config
     app['auth-db'] = get_engine(auth_db)
+    app['services'] = services
 
     app.add_routes(get_routes())
     # добавление автоматической генерации документации для апи

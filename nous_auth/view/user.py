@@ -1,4 +1,6 @@
-from aiohttp import web
+from aiohttp import web, ClientSession
+
+from nous_auth.query.user import rm_token
 
 
 async def user_authentication(request):
@@ -8,7 +10,22 @@ async def user_authentication(request):
 
 async def token_cancel(request):
     """Remove user token if it exist."""
-    return web.Response(text='token cancel')
+    token = request.match_info['token']
+    app = request.app
+
+    async with app['auth-db'] as conn:
+        await rm_token(conn, token)
+
+    # remove token in all services
+    for service in app['services']:
+        while True:
+            async with ClientSession() as session:
+                url = service['token_delete'].format(token=token)
+                async with session.delete(url) as resp:
+                    if resp.status == 200:
+                        break
+
+    return web.Response()
 
 
 async def user_registration(request):
