@@ -5,7 +5,7 @@ import click
 import logging.config
 
 from nous_auth.settings import get_config
-from nous_auth.db import db_connect
+from nous_auth.db import get_engine
 from nous_auth.route import get_routes
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ def get_app(config):
 
     app = web.Application()
     app['config'] = config
-    app['auth-db'] = db_connect(auth_db)
+    app['auth-db'] = get_engine(auth_db)
 
     app.add_routes(get_routes())
     # добавление автоматической генерации документации для апи
