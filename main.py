@@ -22,7 +22,7 @@ def get_app(config):
 
     app.add_routes(get_routes())
     # добавление автоматической генерации документации для апи
-    swagger.setup_swagger(app, swagger_url='/api/v1/doc')
+    swagger.setup_swagger(app, swagger_url='/api/doc')
 
     return app
 
