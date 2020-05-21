@@ -17,6 +17,17 @@ class Account(Schema):
     country = fields.Int(dump_only=True)
 
 
+class GetAccount(Account):
+    @post_dump
+    def rm_pass(self, data, **kwargs):
+        try:
+            data.pop('password')
+            data.pop('id')
+        except KeyError:
+            pass
+        return data
+
+
 class AccountReg(Account):
     email = fields.Str(required=False)
     password = fields.Str(required=True)
