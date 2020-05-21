@@ -23,5 +23,6 @@ loggers:
       level: DEBUG
       stream: ext://sys.stdout
 
-
+settings:
+  api: 0
 

@@ -16,15 +16,21 @@ def get_app(config):
     db_configs = config.pop('databases')
     services = config.pop('services')
     auth_db = db_configs['auth-db']
+    settings = config.pop('settings')
 
     app = web.Application()
     app['config'] = config
     app['auth-db'] = get_engine(auth_db)
     app['services'] = services
 
-    app.add_routes(get_routes())
+    app.add_routes(get_routes(settings['api']))
     # добавление автоматической генерации документации для апи
-    swagger.setup_swagger(app, swagger_url='/api/doc')
+    swagger.setup_swagger(
+        app,
+        title='API сервиса авторизации.',
+        api_version=settings['api'] or 'all versions',
+        swagger_url='/api/doc/auth_service',
+    )
 
     return app
 
