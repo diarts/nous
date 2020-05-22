@@ -7,6 +7,7 @@ from sqlalchemy import (
     Text,
     BigInteger,
     SmallInteger,
+    UniqueConstraint,
 )
 from ..const import UserTypes
 
@@ -25,7 +26,7 @@ user = Table(
     'user',
     meta,
     Column('id', Integer, primary_key=True),
-    Column('email', String(length=128), nullable=True, index=True),
+    Column('email', String(length=128), unique=True, nullable=True, index=True),
     Column('password', Text, nullable=False),
     Column('username', String(length=128), nullable=True, index=True),
     Column('phone', Integer, nullable=True, index=True),
@@ -34,6 +35,8 @@ user = Table(
     Column('blocked', Integer, nullable=False, default=0),
     Column('role', SmallInteger, nullable=False, default=UserTypes.USER),
     Column('country', SmallInteger, nullable=False),
+
+    UniqueConstraint('phone', 'country', name='full_phone_constraint')
 )
 
 token = Table(
@@ -41,7 +44,7 @@ token = Table(
     meta,
     Column('id', BigInteger, primary_key=True),
     Column('user_id', Integer, nullable=False, index=True),
-    Column('token', Text, nullable=False, index=True),
+    Column('token', Text, nullable=False, unique=True, index=True),
     Column('create_date', Integer, nullable=False),
 )
 
