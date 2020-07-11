@@ -44,7 +44,7 @@ def upgrade():
     sa.Column('vip', sa.Integer(), nullable=True),
     sa.Column('blocked', sa.Integer(), nullable=False),
     sa.Column('role', sa.SmallInteger(), nullable=False),
-    sa.Column('country', sa.SmallInteger(), nullable=False),
+    sa.Column('country', sa.SmallInteger(), nullable=True),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_user')),
     sa.UniqueConstraint('phone', 'country', name='full_phone_constraint')
     )

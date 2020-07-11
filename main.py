@@ -8,7 +8,7 @@ from nous_auth.settings import get_config
 from nous_auth.db import get_engine
 from nous_auth.route import get_routes
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('auth')
 
 
 def get_app(config):
@@ -46,7 +46,7 @@ def run(config):
     """Starting web application."""
     click.echo('Handle config file.')
     config = get_config(config)
-    log_conf = config.pop('loggers')
+    log_conf = config.pop('logger')
     logging.config.dictConfig(log_conf)
 
     click.echo('Configure application.')

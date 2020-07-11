@@ -35,7 +35,7 @@ user = Table(
     Column('vip', Integer, nullable=True),
     Column('blocked', Integer, nullable=False, default=0),
     Column('role', SmallInteger, nullable=False, default=UserTypes.USER),
-    Column('country', SmallInteger, nullable=False),
+    Column('country', SmallInteger, nullable=True),
 
     UniqueConstraint('phone', 'country', name='full_phone_constraint')
 )
