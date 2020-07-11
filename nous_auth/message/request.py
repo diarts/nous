@@ -7,6 +7,7 @@ __all__ = [
     'IncorrectPassword',
     'MissedParameters',
     'WrongParameter',
+    'IncorrectJson',
 ]
 
 
@@ -19,7 +20,7 @@ class BadRequestMessage(RequestMessage):
 class EmailNotFound(BadRequestMessage):
     """Bad request message, use when sent user mail not found in DB."""
     _code = 21
-    _text = 'User with email: "{email}" not found.'
+    _text = "User with email '{email}' not found."
 
     def __init__(self, email: str):
         self._text = self.text.format(email=email)
@@ -38,6 +39,15 @@ class IncorrectPassword(BadRequestMessage):
     """Bad request message, use when sent wrong user password."""
     _code = 22
     _text = 'You sent wrong password.'
+
+
+class IncorrectJson(BadRequestMessage):
+    """Bad request message, use when request body has incorrect json."""
+    _code = 24
+    _text = 'Incorrect request json: {json}.'
+
+    def __init__(self, error: str):
+        self._text = self._text.format(json=error)
 
 
 class MissedParameters(BadRequestMessage):
