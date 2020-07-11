@@ -1,7 +1,11 @@
-from marshmallow import fields, Schema, post_dump, ValidationError
+from marshmallow import fields, Schema, post_load, post_dump, ValidationError
 from trafaret import DataError
 
-from ..validation.user import REGISTER, phone_validation
+from ..validation.user import (
+    REGISTER,
+    phone_validation,
+    authorization_validation,
+)
 
 
 class Account(Schema):
@@ -22,9 +26,13 @@ class GetAccount(Account):
     def rm_pass(self, data, **kwargs):
         try:
             data.pop('password')
+        except KeyError:
+            pass
+        try:
             data.pop('id')
         except KeyError:
             pass
+
         return data
 
 
@@ -35,7 +43,7 @@ class AccountReg(Account):
     phone = fields.Int(required=False)
     country = fields.Int(required=False)
 
-    @post_dump
+    @post_load
     def validation(self, data, **kwargs):
         try:
             phone_validation(
@@ -44,10 +52,20 @@ class AccountReg(Account):
             )
             REGISTER.check(data)
 
-            if not data.get('email') and not data.get('phone'):
+            if not data.get('email') and (not data.get('phone')
+                                          and not data.get('country')):
                 raise DataError(
-                    error='For registration require email or phone.'
+                    error='For registration require email or phone + country.'
                 )
         except DataError as err:
             raise ValidationError(message=f'{err}')
+        return data
+
+
+class AccountAuth(AccountReg):
+    password = fields.Str(required=False)
+
+    @post_load
+    def validation(self, data, **kwargs):
+        authorization_validation(data)
         return data
