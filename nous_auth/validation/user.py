@@ -5,7 +5,6 @@ from trafaret import (
     Int,
     DataError,
 )
-from aiohttp.web import json_response
 
 from nous_auth.const.country import COUNTRY_NUMBERS
 from nous_auth.message import MissedParameters, WrongParameter
@@ -31,7 +30,7 @@ def phone_validation(phone: int = None, country: int = None):
             raise DataError(error='Incorrect country number.')
 
     if len(str(phone)) != 10:
-        raise DataError(error='Phone length incorrect.')
+        raise DataError(error='Incorrect phone length.')
 
 
 def authorization_validation(parameters):
@@ -42,22 +41,17 @@ def authorization_validation(parameters):
         try:
             parameters['email']
         except KeyError:
-            mess = MissedParameters('email', 'phone')
-            raise json_response(data=mess.json, status=400)
+            raise MissedParameters('email', 'phone')
     else:
         try:
             parameters['country']
         except KeyError:
-            mess = MissedParameters('country')
-            raise json_response(data=mess.json, status=400)
-
+            raise MissedParameters('country')
     try:
         password = parameters['password']
 
         if ' ' in password:
-            mess = WrongParameter(parameter='password',
-                                  text='Password can not contain spaces.')
-            raise json_response(data=mess.json, status=400)
+            raise WrongParameter(parameter='password',
+                                 text='Password can not contain spaces.')
     except KeyError:
-        mess = MissedParameters('password')
-        raise json_response(data=mess.json, status=400)
+        raise MissedParameters('password')

@@ -1,4 +1,4 @@
-class RequestMessage:
+class RequestMessage(Exception):
     """Base request message."""
     _text: str = None
     _code: int = 0
@@ -27,3 +27,18 @@ class RequestMessage:
             'code': self.code,
             'text': self.text,
         }
+
+
+class LoggerMessage:
+    """Base logger message."""
+    _MessageBase = '{mess}.'
+
+    def __init__(self, mess: str):
+        self._mess = self._MessageBase.format(mess=mess)
+
+    @property
+    def message(self):
+        return self._mess
+
+    def __repr__(self):
+        return f'<Logger Message> with message: {self.message}'

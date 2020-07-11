@@ -63,8 +63,6 @@ class AccountReg(Account):
 
 
 class AccountAuth(AccountReg):
-    password = fields.Str(required=False)
-
     @post_load
     def validation(self, data, **kwargs):
         authorization_validation(data)

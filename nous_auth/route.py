@@ -13,8 +13,8 @@ apis = {
     1: [
         web.get(r'/api/v1/token/{token:\w+}', user_authentication),
         web.delete(r'/api/v1/token/{token:\w+}', token_cancel),
+        web.post('/api/v1/token', user_authorization),
 
-        web.get('/api/v1/user', user_authorization),
         web.post('/api/v1/user', user_registration),
         web.put('/api/v1/user', user_update),
         web.delete(r'/api/v1/user/{user_id:\d+}', user_remove)
