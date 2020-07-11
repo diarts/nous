@@ -9,19 +9,26 @@ databases:
 services:
 
 loggers:
-  version: 1
-  disable_existing_loggers: False
-  # форматтеры
-  formatters:
-    default:
-      format: "%(pathname)s -[%(asctime)s] - %(levelname)s: %(message)s"
+  default:
+    version: 1
+    disable_existing_loggers: False
+    # форматтеры
+    formatters:
+      default:
+        format: "%(pathname)s -[%(asctime)s] - %(levelname)s: %(message)s"
 
-  handlers:
-    console:
-      class: logging.StreamHandler
-      formatter: default
-      level: DEBUG
-      stream: ext://sys.stdout
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: default
+        level: DEBUG
+        stream: ext://sys.stdout
+
+    loggers:
+      auth:
+        level: DEBUG
+        handlers: [dev_log, logstash, console]
+        propagate: False
 
 settings:
   api: 0

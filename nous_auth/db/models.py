@@ -8,6 +8,7 @@ from sqlalchemy import (
     BigInteger,
     SmallInteger,
     UniqueConstraint,
+    VARCHAR,
 )
 from ..const import UserTypes
 
@@ -44,7 +45,7 @@ token = Table(
     meta,
     Column('id', BigInteger, primary_key=True),
     Column('user_id', Integer, nullable=False, index=True),
-    Column('token', Text, nullable=False, unique=True, index=True),
+    Column('token', VARCHAR(32), nullable=False, unique=True, index=True),
     Column('create_date', Integer, nullable=False),
 )
 
