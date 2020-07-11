@@ -41,7 +41,11 @@ def authorization_validation(parameters):
         try:
             parameters['email']
         except KeyError:
-            raise MissedParameters('email', 'phone')
+            miss = ['phone']
+            if 'country' not in parameters:
+                miss.append('email')
+
+            raise MissedParameters(*miss)
     else:
         try:
             parameters['country']

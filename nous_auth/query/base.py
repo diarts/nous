@@ -28,5 +28,8 @@ async def get_objects(conn: Database, query):
 
 async def make_object(model, conn: Database, data: dict or List[dict]):
     """Make object/objects in DB."""
+    if isinstance(data, dict):
+        data = [data]
+
     query = insert(model).values(*data)
     return await conn.execute(query=query)

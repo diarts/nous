@@ -1,5 +1,6 @@
 from time import time as current_time
 from logging import getLogger
+from json import JSONDecodeError
 
 from aiohttp import web, ClientSession
 from marshmallow import ValidationError
@@ -69,7 +70,7 @@ async def user_authentication(request: web.Request):
         async with app['auth-db'] as conn:
             token_obj = await get_token(conn, token)
     except Exception as err:
-        logger.error(DBErrorMessage(str(err)).message)
+        logger.exception(DBErrorMessage(str(err)).message)
         raise web.HTTPInternalServerError()
 
     # token wasn't exist
@@ -80,7 +81,7 @@ async def user_authentication(request: web.Request):
         async with app['auth-db'] as conn:
             user_obj = await get_user(conn, token_obj.get('user_id'))
     except Exception as err:
-        logger.error(DBErrorMessage(str(err)).message)
+        logger.exception(DBErrorMessage(str(err)).message)
         raise web.HTTPInternalServerError()
 
     user = GetAccount().dump(user_obj)
@@ -104,7 +105,7 @@ async def token_cancel(request: web.Request):
         async with app['auth-db'] as conn:
             await rm_token(conn, token)
     except Exception as err:
-        logger.error(DBErrorMessage(str(err)).message)
+        logger.exception(DBErrorMessage(str(err)).message)
         raise web.HTTPInternalServerError()
 
     # remove token in all services
@@ -177,72 +178,75 @@ async def user_authorization(request: web.Request):
     """
     app = request.app
 
-    # converting parameters
-    parameters = await request.json()
     try:
-        parameters = AccountAuth(many=False).load(parameters, unknown='RAISE')
-    except ValidationError as mess:
-        raise web.HTTPBadRequest(text=str(mess))
-    except (MissedParameters, WrongParameter) as mess:
-        raise web.HTTPBadRequest(body=mess.json)
-
-    # find user by password and email or phone number
-    password = parameters['password']
-
-    try:
-        email = parameters['email']
+        # converting parameters
         try:
-            async with app['auth-db'] as conn:
-                user_obj = await get_user_by_email(conn, email)
-        except Exception as err:
-            logger.error(DBErrorMessage(str(err)).message)
-            raise web.HTTPInternalServerError()
-
-        if not user_obj:
-            mess = EmailNotFound(email=email)
-            raise web.json_response(data=mess.json, status=400)
-
-        if user_obj.password != password:
-            mess = IncorrectPassword()
-            raise web.json_response(data=mess.json, status=400)
-
-    except KeyError:
-        country, phone, = parameters['country'], parameters['phone']
+            parameters = await request.json()
+        except JSONDecodeError as err:
+            raise IncorrectJson(err.msg)
 
         try:
+            parameters = AccountAuth(many=False).load(parameters,
+                                                      unknown='RAISE')
+        except ValidationError as mess:
+            raise web.HTTPBadRequest(text=str(mess))
+
+        # find user by password and email or phone number
+        password = parameters['password']
+
+        try:
+            email = parameters['email']
+            try:
+                async with app['auth-db'] as conn:
+                    user_obj = await get_user_by_email(conn, email)
+            except Exception as err:
+                logger.exception(DBErrorMessage(str(err)).message)
+                raise web.HTTPInternalServerError()
+
+            if not user_obj:
+                raise EmailNotFound(email=email)
+
+            if user_obj.get('password') != password:
+                raise IncorrectPassword()
+
+        except KeyError:
+            country, phone, = parameters['country'], parameters['phone']
+
+            try:
+                async with app['auth-db'] as conn:
+                    user_obj = await get_user_by_phone(conn, phone, country)
+            except Exception as err:
+                logger.exception(DBErrorMessage(str(err)).message)
+                raise web.HTTPInternalServerError()
+
+            if not user_obj:
+                raise PhoneNotFound(country=country, phone=phone)
+
+            if user_obj.get('password') != password:
+                raise IncorrectPassword()
+
+        # generate new token
+        new_token = {
+            'user_id': user_obj.get('id'),
+            'token': generate_token(),
+            'create_date': current_time(),
+        }
+        try:
             async with app['auth-db'] as conn:
-                user_obj = await get_user_by_phone(conn, phone, country)
+                await make_token(conn, new_token)
         except Exception as err:
-            logger.error(DBErrorMessage(str(err)).message)
+            logger.exception(DBErrorMessage(str(err)).message)
             raise web.HTTPInternalServerError()
 
-        if not user_obj:
-            mess = PhoneNotFound(country=country, phone=phone)
-            raise web.json_response(data=mess.json, status=400)
+        response = GetAccount().dump(user_obj)
+        response['token'] = new_token['token']
+        response['user_id'] = user_obj.get('id')
+        status = 200
+    except BadRequestMessage as mess:
+        response = mess.json
+        status = 400
 
-        if user_obj.password != password:
-            mess = IncorrectPassword()
-            raise web.json_response(data=mess.json, status=400)
-
-    # generate new token
-    new_token = {
-        'user_id': user_obj.id,
-        'token': generate_token(),
-        'create_date': current_time(),
-    }
-    try:
-        async with app['auth-db'] as conn:
-            result = await make_token(conn, new_token)
-            print(result)
-
-    except Exception as err:
-        logger.error(DBErrorMessage(str(err)).message)
-        raise web.HTTPInternalServerError()
-
-    respose = GetAccount().dump(user_obj)
-    respose['token'] = new_token['token']
-    respose['user_id'] = user_obj.id
-    return web.json_response(respose)
+    return web.json_response(response, status=status)
 
 
 async def user_update(request: web.Request):
