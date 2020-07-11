@@ -1,8 +1,8 @@
-"""Added user, token and history tables
+"""add base tables
 
-Revision ID: af2374120e0c
+Revision ID: c8ffd9f200f9
 Revises: 
-Create Date: 2020-05-13 18:29:12.040879
+Create Date: 2020-07-11 19:18:31.433294
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'af2374120e0c'
+revision = 'c8ffd9f200f9'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -28,11 +28,11 @@ def upgrade():
     op.create_table('token',
     sa.Column('id', sa.BigInteger(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('token', sa.Text(), nullable=False),
+    sa.Column('token', sa.VARCHAR(length=32), nullable=False),
     sa.Column('create_date', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_token'))
     )
-    op.create_index(op.f('ix_token_token'), 'token', ['token'], unique=False)
+    op.create_index(op.f('ix_token_token'), 'token', ['token'], unique=True)
     op.create_index(op.f('ix_token_user_id'), 'token', ['user_id'], unique=False)
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -45,9 +45,10 @@ def upgrade():
     sa.Column('blocked', sa.Integer(), nullable=False),
     sa.Column('role', sa.SmallInteger(), nullable=False),
     sa.Column('country', sa.SmallInteger(), nullable=False),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_user'))
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_user')),
+    sa.UniqueConstraint('phone', 'country', name='full_phone_constraint')
     )
-    op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=False)
+    op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
     op.create_index(op.f('ix_user_phone'), 'user', ['phone'], unique=False)
     op.create_index(op.f('ix_user_username'), 'user', ['username'], unique=False)
     # ### end Alembic commands ###
